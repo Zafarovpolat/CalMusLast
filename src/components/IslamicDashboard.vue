@@ -134,6 +134,7 @@
         v-model="input.time"
         @blur="handleExpandedBlur(index, inputIndex)"
         @input="handleTimeInput(index, $event, inputIndex)" 
+        placeholder="00:00 - 00:00"
       />
     </div>
   </div>
