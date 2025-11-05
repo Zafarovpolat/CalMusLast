@@ -9,7 +9,7 @@
       </div>
 
       <!-- Goals + Time + Mobile Calendar -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 ">
         <div class="flex items-center justify-center lg:justify-start">
           <div class="w-full bg-slate-50/95 backdrop-blur-sm rounded-2xl border-2 border-slate-200/50 shadow-2xl hover:shadow-3xl transition-all duration-500 px-6 py-4">
             <h2 class="text-[#8c59d0] text-xl font-bold text-center tracking-wider">ЦЕЛИ</h2>
@@ -68,51 +68,48 @@
         <div v-for="(p, index) in prayers" :key="p.title" class="w-full max-w-56 flex flex-col mx-auto mb-8">
           <h3 class="text-black text-center font-cairo text-xl font-semibold mb-1">{{ p.title }}</h3>
           <p class="text-black text-center font-cairo text-base font-medium mb-3">{{ p.time }}</p>
-          <div :class="`prayer-card-${index} w-full aspect-[9/16] rounded-2xl border-2 border-t-[#323232] border-r-[#323232] border-b-4 border-b-[#323232] border-l-[#323232] relative overflow-hidden flex flex-col bg-white`">
-            <div class="h-8 mx-2 mt-2 rounded-lg flex items-center justify-center">
-              <span class="text-primary font-cairo text-xs font-bold">НАМАЗ</span>
-            </div>
-
+          <div :class="`prayer-card-${index} w-full aspect-[9/16] rounded-2xl border-2 border-t-[#323232] border-r-[#323232] border-b-4 border-b-[#323232] border-l-[#323232] relative overflow-hidden pb-2 flex flex-col bg-white`">
+            <div class="prayer-card-content h-full overflow-y-auto ">
             <!-- Multiple input sections with animation -->
             <TransitionGroup name="list-item" tag="div">
               <div 
-  v-for="(input, inputIndex) in prayerCardStates[index].inputs" 
+                v-for="(input, inputIndex) in prayerCardStates[index].inputs" 
   :key="input.id" 
   class="list-item-container mb-2"
 >
   
   <!-- Блок со свернутым инпутом -->
   <div 
+  :class="[
+    'collapsed-input-block h-8 mx-2 mt-2 rounded-lg border border-primary flex items-center overflow-hidden transition-all duration-300 ease-in-out',
+    input.expanded ? 'collapsed-hidden' : 'collapsed-visible',
+    input.isFixed ? 'bg-gray-100' : 'bg-transparent'
+  ]"
+>
+  <input 
+    @click="!input.isFixed && expandAndFocusText(index, inputIndex)" 
+    :value="input.text" 
+    :title="input.text" 
+    placeholder="Текст" 
     :class="[
-      'collapsed-input-block h-8 mx-2 mt-2 rounded-lg border border-primary flex items-center overflow-hidden transition-all duration-300 ease-in-out',
-      input.expanded ? 'collapsed-hidden' : 'collapsed-visible',
-      input.isFixed ? 'bg-gray-100' : 'bg-transparent'
+      'text-black border-none outline-none px-2 h-full flex-1 truncate w-full text-sm font-medium font-poppins',
+      input.isFixed ? 'cursor-default bg-gray-100 text-center ' : 'cursor-pointer hover:bg-gray-50 bg-transparent'
     ]"
-  >
+    readonly 
+  />
+  <div v-if="!input.isFixed || input.time" class="h-full flex items-center">
     <input 
-      @click="!input.isFixed && expandAndFocusText(index, inputIndex)" 
-      :value="input.text" 
-      :title="input.text" 
-      placeholder="Текст" 
+      @click="!input.isFixed && expandAndFocusTime(index, inputIndex)" 
+      :value="input.time" 
+      placeholder="Время" 
       :class="[
-        'text-black border-none outline-none px-2 h-full flex-1 truncate w-full text-sm',
-        input.isFixed ? 'cursor-default bg-gray-100' : 'cursor-pointer hover:bg-gray-50 bg-transparent'
+        'border-none outline-none h-full w-auto min-w-[60px] max-w-[110px] text-right placeholder:text-right px-2 text-sm whitespace-nowrap',
+        input.isFixed ? 'cursor-default bg-gray-100 text-black' : 'cursor-pointer hover:bg-gray-50 bg-transparent text-black'
       ]"
       readonly 
     />
-    <div class="h-full flex items-center">
-      <input 
-        @click="!input.isFixed && expandAndFocusTime(index, inputIndex)" 
-        :value="input.time" 
-        placeholder="Время" 
-        :class="[
-          'border-none outline-none h-full w-auto min-w-[60px] max-w-[110px] text-right placeholder:text-right px-2 text-sm whitespace-nowrap',
-          input.isFixed ? 'cursor-default bg-gray-100 text-black' : 'cursor-pointer hover:bg-gray-50 bg-transparent text-black'
-        ]"
-        readonly 
-      />
-    </div>
   </div>
+</div>
 
   <!-- Раскрывающийся блок -->
   <div 
@@ -147,17 +144,18 @@
                 <span class="">+</span>
               </button>
             </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Bottom Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
         <div>
           <div class="w-full min-h-[100%] bg-slate-50/95 backdrop-blur-sm rounded-2xl border-2 border-slate-200/50 shadow-2xl hover:shadow-3xl transition-all duration-500 px-3 py-3 flex flex-col">
             <h3 class="text-[#8c59d0] text-center font-semibold tracking-wide mb-2">Напоминание</h3>
             <div class="w-full h-full">
-              <textarea class="w-full min-h-40 h-full bg-transparent outline-none placeholder:text-gray-400 resize-none text-gray-900 p-2" placeholder="Введите напоминание"></textarea>
+              <textarea class="w-full min-h-[15rem] h-full bg-transparent outline-none placeholder:text-gray-400 resize-none text-gray-900 p-2" placeholder="Введите напоминание"></textarea>
             </div>
           </div>
         </div>
@@ -246,6 +244,15 @@ interface PrayerCard {
   time: string
 }
 
+interface Input {
+  id: string
+  expanded: boolean
+  time: string
+  text: string
+  isFixed: boolean
+  isPinned?: boolean
+}
+
 const prayers: PrayerCard[] = [
   { title: 'Фаджр', time: '04:00' },
   { title: 'Зухр', time: '11:00' },
@@ -254,13 +261,91 @@ const prayers: PrayerCard[] = [
   { title: 'Иша', time: '21:00' },
 ]
 
-const addMinutesToTime = (time: string, minutes: number): string => {
-  const [hours, mins] = time.split(':').map(Number)
-  const date = new Date()
-  date.setHours(hours, mins + minutes, 0, 0)
-  const newHours = date.getHours().toString().padStart(2, '0')
-  const newMins = date.getMinutes().toString().padStart(2, '0')
-  return `${time} - ${newHours}:${newMins}`
+
+const getInitialInputsForPrayer = (prayer: PrayerCard): Input[] => {
+  switch(prayer.title) {
+    case 'Фаджр':
+    case 'Зухр':
+      return [
+        {
+          id: `ratibat-${prayer.title}-${Date.now()}-1`,
+          expanded: false,
+          time: '',
+          text: 'Ратибат',
+          isFixed: true
+        },
+        {
+          id: `namaz-${prayer.title}-${Date.now()}-2`,
+          expanded: false,
+          time: '',
+          text: 'НАМАЗ',
+          isFixed: true
+        },
+        {
+          id: `azkary-${prayer.title}-${Date.now()}-3`,
+          expanded: false,
+          time: '',
+          text: 'Азкары',
+          isFixed: true
+        }
+      ]
+    
+    case 'Аср':
+    case 'Магриб':
+      return [
+        {
+          id: `namaz-${prayer.title}-${Date.now()}-1`,
+          expanded: false,
+          time: '',
+          text: 'НАМАЗ',
+          isFixed: true
+        },
+        {
+          id: `ratibat-${prayer.title}-${Date.now()}-2`,
+          expanded: false,
+          time: '',
+          text: 'Ратибат',
+          isFixed: true
+        }
+      ]
+    
+    case 'Иша':
+      return [
+        {
+          id: `namaz-${prayer.title}-${Date.now()}-1`,
+          expanded: false,
+          time: '',
+          text: 'НАМАЗ',
+          isFixed: true
+        },
+        {
+          id: `ratibat-${prayer.title}-${Date.now()}-2`,
+          expanded: false,
+          time: '',
+          text: 'Ратибат',
+          isFixed: true
+        },
+        {
+          id: `tahajjud-${prayer.title}-${Date.now()}-3`,
+          expanded: false,
+          time: '',
+          text: 'Тахаджуд',
+          isFixed: true,
+          isPinned: true
+        }
+      ]
+    
+    default:
+      return [
+        {
+          id: `fixed-${prayer.title}-${Date.now()}`,
+          expanded: false,
+          time: '',
+          text: 'Намаз',
+          isFixed: true
+        }
+      ]
+  }
 }
 
 const currentDate = ref(new Date())
@@ -268,27 +353,13 @@ const selectedDate = ref(new Date())
 
 const prayerCardStates = ref(
   prayers.map(prayer => ({
-    inputs: [
-      {
-        id: `fixed-${prayer.title}-${Date.now()}`,
-        expanded: false,
-        time: addMinutesToTime(prayer.time, 10),
-        text: 'Намаз',
-        isFixed: true
-      },
-      {
-        id: `editable-${prayer.title}-${Date.now() + 1}`,
-        expanded: false,
-        time: '',
-        text: '',
-        isFixed: false
-      }
-    ]
+    inputs: getInitialInputsForPrayer(prayer)
   }))
 )
 
-// Notes state - обновленная структура
+// Notes state
 const notes = ref([
+  { focused: false, text: '' },
   { focused: false, text: '' },
   { focused: false, text: '' },
   { focused: false, text: '' }
@@ -404,13 +475,23 @@ const expandAndFocusTime = async (cardIndex: number, inputIndex: number) => {
 }
 
 const addNewInput = (cardIndex: number) => {
-  prayerCardStates.value[cardIndex].inputs.push({
+  const prayer = prayers[cardIndex]
+  const newInput: Input = {
     id: `new-${Date.now()}-${Math.random()}`,
     expanded: false,
     time: '',
     text: '',
     isFixed: false
-  })
+  }
+  
+  if (prayer.title === 'Иша') {
+    // Для Иша добавляем перед последним элементом (Тахаджуд)
+    const inputs = prayerCardStates.value[cardIndex].inputs
+    prayerCardStates.value[cardIndex].inputs.splice(inputs.length - 1, 0, newInput)
+  } else {
+    // Для остальных добавляем в конец
+    prayerCardStates.value[cardIndex].inputs.push(newInput)
+  }
 }
 
 const handleExpandedBlur = (cardIndex: number, inputIndex: number) => {
@@ -418,7 +499,6 @@ const handleExpandedBlur = (cardIndex: number, inputIndex: number) => {
     const activeElement = document.activeElement
     const container = document.querySelectorAll(`.prayer-card-${cardIndex} .list-item-container`)[inputIndex] as HTMLElement
     
-    // Если фокус НЕ внутри того же контейнера, закрываем
     if (container && (!activeElement || !container.contains(activeElement))) {
       if (prayerCardStates.value[cardIndex]?.inputs[inputIndex]) {
         prayerCardStates.value[cardIndex].inputs[inputIndex].expanded = false
@@ -427,8 +507,6 @@ const handleExpandedBlur = (cardIndex: number, inputIndex: number) => {
   }, 100)
 }
 
-
-// Notes functions - обновленные
 const focusNote = (noteIndex: number) => {
   if (notes.value[noteIndex]) {
     notes.value[noteIndex].focused = true
@@ -602,5 +680,32 @@ onMounted(() => {
 .expandable-block-open {
   max-height: 250px;
   opacity: 1;
+}
+
+[class*="prayer-card-content"] {
+  scrollbar-width: thin;
+  scrollbar-color: #8C59D0 transparent; /* Синий полупрозрачный */
+}
+
+[class*="prayer-card-content"]::-webkit-scrollbar {
+  width: 4px; /* Тонкий скроллбар */
+}
+
+[class*="prayer-card-content"]::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+[class*="prayer-card-content"]::-webkit-scrollbar-thumb {
+  background: #8C59D0; /* Синий полупрозрачный */
+  border-radius: 10px;
+}
+
+[class*="prayer-card-content"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.8); /* Ярче при наведении */
+}
+
+[class*="prayer-card-content"]::-webkit-scrollbar-button {
+  display: none;
 }
 </style>
