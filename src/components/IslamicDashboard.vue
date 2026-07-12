@@ -163,39 +163,41 @@
         <div class="h-full">
           <div class="w-full bg-slate-50/95 backdrop-blur-sm rounded-2xl border-2 border-slate-200/50 shadow-2xl hover:shadow-3xl transition-all duration-500 px-4 py-4 flex flex-col bottom-panel">
             <h3 class="text-[#8c59d0] text-center font-semibold tracking-wide mb-2">Заметки</h3>
-            <div class="space-y-2 notes-section notes-scroll flex-1 min-h-0 overflow-y-auto pr-1">
-              <!-- Expandable note inputs -->
-              <div v-for="(note, noteIndex) in notes" :key="noteIndex" class="mb-2 relative">
-                <textarea 
-                  v-model="note.text"
-                  @focus="focusNote(noteIndex)"
-                  @blur="blurNote(noteIndex)"
-                  :class="[
-                    'w-full resize-none overflow-y-auto text-gray-900 bg-white/70 backdrop-blur-sm shadow-inner ring-1 ring-white/50 rounded-lg outline-none px-3 py-2 transition-all duration-300 ease-in-out',
-                    note.focused ? 'note-expanded' : 'note-collapsed'
-                  ]"
-                  placeholder="Введите текст"
-                  :aria-label="`Заметка ${noteIndex + 1}`"
-                ></textarea>
-                
-                <!-- Кнопка удаления появляется при фокусе -->
-                <Transition name="fade">
-                  <button 
-                    v-if="note.focused && notes.length > 1"
-                    @mousedown.prevent="deleteNote(noteIndex)"
-                    :aria-label="`Удалить заметку ${noteIndex + 1}`"
-                    class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-sm bg-white/90 rounded-full w-6 h-6 flex items-center justify-center shadow-md transition-all hover:scale-110"
-                  >
-                    ✕
-                  </button>
-                </Transition>
+            <div class="flex flex-col min-h-0 flex-1">
+              <div class="space-y-2 notes-section notes-scroll flex-1 min-h-0 overflow-y-auto pr-1">
+                <!-- Expandable note inputs -->
+                <div v-for="(note, noteIndex) in notes" :key="noteIndex" class="mb-2 relative">
+                  <textarea 
+                    v-model="note.text"
+                    @focus="focusNote(noteIndex)"
+                    @blur="blurNote(noteIndex)"
+                    :class="[
+                      'w-full resize-none overflow-y-auto text-gray-900 bg-white/70 backdrop-blur-sm shadow-inner ring-1 ring-white/50 rounded-lg outline-none px-3 py-2 transition-all duration-300 ease-in-out',
+                      note.focused ? 'note-expanded' : 'note-collapsed'
+                    ]"
+                    placeholder="Введите текст"
+                    :aria-label="`Заметка ${noteIndex + 1}`"
+                  ></textarea>
+                  
+                  <!-- Кнопка удаления появляется при фокусе -->
+                  <Transition name="fade">
+                    <button 
+                      v-if="note.focused && notes.length > 1"
+                      @mousedown.prevent="deleteNote(noteIndex)"
+                      :aria-label="`Удалить заметку ${noteIndex + 1}`"
+                      class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-sm bg-white/90 rounded-full w-6 h-6 flex items-center justify-center shadow-md transition-all hover:scale-110"
+                    >
+                      ✕
+                    </button>
+                  </Transition>
+                </div>
               </div>
 
               <!-- Add new note button -->
               <button
                 @click="addNewNote"
                 aria-label="Добавить заметку"
-                class="w-full h-10 rounded-full bg-[#8c59d0] hover:bg-[#7c4cc0] text-white font-medium transition-colors flex items-center justify-center"
+                class="w-full h-10 rounded-full bg-[#8c59d0] hover:bg-[#7c4cc0] text-white font-medium transition-colors flex items-center justify-center shrink-0 mt-2"
               >
                 <span class="text-lg mr-2">+</span>
                 Добавить заметку
