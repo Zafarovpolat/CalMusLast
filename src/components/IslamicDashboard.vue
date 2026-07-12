@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-[#8c59d0] via-[#9d6ad6] to-[#7c4cc0] p-4 pb-16 sm:pb-18 md:pb-20 font-poppins flex items-center justify-center">
-    <div class="max-w-7xl mx-auto space-y-2 w-full">
+    <div class="max-w-[1360px] mx-auto space-y-2 w-full">
       <!-- Top bar -->
       <div class="flex items-start justify-between">
         <div class="w-8 h-8 bg-slate-50/95 backdrop-blur-sm rounded-full border-2 border-slate-200/50 shadow-2xl hover:shadow-3xl transition-all duration-500 flex items-center justify-center">
@@ -28,9 +28,9 @@
         <div class="flex justify-center lg:justify-end">
           <div class="w-full lg:w-96 bg-slate-50/95 backdrop-blur-sm rounded-2xl border-2 border-slate-200/50 shadow-2xl hover:shadow-3xl transition-all duration-500 p-1 overflow-hidden flex flex-col">
             <div class="rounded-2xl bg-[#9d6ad6] text-white text-center font-bold tracking-wide py-1.5 mx-0.5 mb-2 flex items-center justify-between px-2">
-              <button @click="previousMonth" class="text-white hover:bg-white/20 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">‹</button>
+              <button @click="previousMonth" aria-label="Предыдущий месяц" class="text-white hover:bg-white/20 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">‹</button>
               <span class="font-poppins text-lg">{{ currentMonthName }}</span>
-              <button @click="nextMonth" class="text-white hover:bg-white/20 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">›</button>
+              <button @click="nextMonth" aria-label="Следующий месяц" class="text-white hover:bg-white/20 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">›</button>
             </div>
             <div class="px-2 flex-1">
               <div class="grid grid-cols-7 text-center text-gray-700 font-semibold text-[11px] border-b border-black/20 pb-1 mb-1">
@@ -64,8 +64,8 @@
       </div>
 
       <!-- Prayer Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-        <div v-for="(p, index) in prayers" :key="p.title" class="w-full max-w-56 flex flex-col mx-auto mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 xl:gap-3">
+        <div v-for="(p, index) in prayers" :key="p.title" class="w-full max-w-[16rem] flex flex-col mx-auto mb-2">
           <h3 class="text-black text-center font-cairo text-xl font-semibold mb-1">{{ p.title }}</h3>
           <p class="text-black text-center font-cairo text-base font-medium mb-3">{{ p.time }}</p>
           <div :class="`prayer-card-${index} w-full aspect-[9/16] rounded-2xl border-2 border-t-[#323232] border-r-[#323232] border-b-4 border-b-[#323232] border-l-[#323232] relative overflow-hidden pb-2 flex flex-col bg-white`">
@@ -140,7 +140,7 @@
             </TransitionGroup>
 
             <div class="mt-4 ml-2">
-              <button @click="addNewInput(index)" class="w-8 h-8 rounded-full text-white text-lg flex items-center justify-center bg-primary hover:bg-primary/80 transition-colors">
+              <button @click="addNewInput(index)" :aria-label="`Добавить элемент в ${p.title}`" class="w-8 h-8 rounded-full text-white text-lg flex items-center justify-center bg-primary hover:bg-primary/80 transition-colors">
                 <span class="">+</span>
               </button>
             </div>
@@ -150,20 +150,20 @@
       </div>
 
       <!-- Bottom Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
-        <div>
-          <div class="w-full min-h-[100%] bg-slate-50/95 backdrop-blur-sm rounded-2xl border-2 border-slate-200/50 shadow-2xl hover:shadow-3xl transition-all duration-500 px-3 py-3 flex flex-col">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 items-stretch">
+        <div class="h-full">
+          <div class="w-full bg-slate-50/95 backdrop-blur-sm rounded-2xl border-2 border-slate-200/50 shadow-2xl hover:shadow-3xl transition-all duration-500 px-4 py-4 flex flex-col bottom-panel">
             <h3 class="text-[#8c59d0] text-center font-semibold tracking-wide mb-2">Напоминание</h3>
             <div class="w-full h-full">
-              <textarea class="w-full min-h-[15rem] h-full bg-transparent outline-none placeholder:text-gray-400 resize-none text-gray-900 p-2" placeholder="Введите напоминание"></textarea>
+              <textarea class="w-full h-full min-h-0 bg-transparent outline-none placeholder:text-gray-400 resize-none text-gray-900 p-2" placeholder="Введите напоминание" aria-label="Напоминание"></textarea>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center justify-center">
-          <div class="w-full max-w-[320px] bg-slate-50/95 backdrop-blur-sm rounded-2xl border-2 border-slate-200/50 shadow-2xl hover:shadow-3xl transition-all duration-500 px-3 pt-2 pb-3">
+        <div class="h-full">
+          <div class="w-full bg-slate-50/95 backdrop-blur-sm rounded-2xl border-2 border-slate-200/50 shadow-2xl hover:shadow-3xl transition-all duration-500 px-4 py-4 flex flex-col bottom-panel">
             <h3 class="text-[#8c59d0] text-center font-semibold tracking-wide mb-2">Заметки</h3>
-            <div class="space-y-2 notes-section">
+            <div class="space-y-2 notes-section notes-scroll flex-1 min-h-0 overflow-y-auto pr-1">
               <!-- Expandable note inputs -->
               <div v-for="(note, noteIndex) in notes" :key="noteIndex" class="mb-2 relative">
                 <textarea 
@@ -175,6 +175,7 @@
                     note.focused ? 'note-expanded' : 'note-collapsed'
                   ]"
                   placeholder="Введите текст"
+                  :aria-label="`Заметка ${noteIndex + 1}`"
                 ></textarea>
                 
                 <!-- Кнопка удаления появляется при фокусе -->
@@ -182,6 +183,7 @@
                   <button 
                     v-if="note.focused && notes.length > 1"
                     @mousedown.prevent="deleteNote(noteIndex)"
+                    :aria-label="`Удалить заметку ${noteIndex + 1}`"
                     class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-sm bg-white/90 rounded-full w-6 h-6 flex items-center justify-center shadow-md transition-all hover:scale-110"
                   >
                     ✕
@@ -192,6 +194,7 @@
               <!-- Add new note button -->
               <button
                 @click="addNewNote"
+                aria-label="Добавить заметку"
                 class="w-full h-10 rounded-full bg-[#8c59d0] hover:bg-[#7c4cc0] text-white font-medium transition-colors flex items-center justify-center"
               >
                 <span class="text-lg mr-2">+</span>
@@ -201,10 +204,10 @@
           </div>
         </div>
 
-        <div>
-          <div class="w-full min-h-52 bg-slate-50/95 backdrop-blur-sm rounded-2xl border-2 border-slate-200/50 shadow-2xl hover:shadow-3xl transition-all duration-500 p-4">
+        <div class="h-full">
+          <div class="w-full bg-slate-50/95 backdrop-blur-sm rounded-2xl border-2 border-slate-200/50 shadow-2xl hover:shadow-3xl transition-all duration-500 p-4 flex flex-col bottom-panel">
             <h3 class="text-[#8c59d0] text-center font-semibold tracking-wide mb-4">Трекер выполнения</h3>
-            <div class="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
+            <div class="grid grid-cols-[1fr_auto_1fr] gap-4 items-start flex-1 min-h-0 overflow-hidden">
               <div>
                 <h2 class="text-center text-gray-900 font-semibold tracking-wide mb-2">Задачи</h2>
                 <div class="space-y-1">
@@ -616,6 +619,10 @@ onMounted(() => {
   max-height: 5.5rem;
 }
 
+.bottom-panel {
+  height: 20rem;
+  min-height: 20rem;
+}
 /* Анимация для кнопки удаления */
 .fade-enter-active,
 .fade-leave-active {
@@ -680,6 +687,31 @@ onMounted(() => {
 .expandable-block-open {
   max-height: 250px;
   opacity: 1;
+}
+
+.notes-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(188, 162, 255, 0.75) rgba(255, 255, 255, 0.08);
+}
+
+.notes-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notes-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+  margin: 4px 0;
+}
+
+.notes-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(214, 190, 255, 0.95), rgba(140, 89, 208, 0.95));
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.notes-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(227, 210, 255, 1), rgba(140, 89, 208, 1));
 }
 
 [class*="prayer-card-content"] {
