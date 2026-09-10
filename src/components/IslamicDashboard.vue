@@ -93,7 +93,7 @@
     :class="[
       'text-black border-none outline-none px-2 h-full flex-1 truncate w-full text-sm font-medium font-poppins',
       row.kind === 'fixed' ? 'cursor-pointer bg-gray-100 text-center' : 'cursor-pointer hover:bg-gray-50 bg-transparent',
-      rowStatus(row) === 'done' ? 'line-through' : ''
+      (rowStatus(row) === 'done' || rowStatus(row) === 'pending') ? 'line-through' : ''
     ]"
     readonly 
   />
@@ -121,7 +121,7 @@
     :class="['task-status-badge', statusClass(row)]"
   >
     <span v-if="rowStatus(row) === 'done'" aria-hidden="true">✓</span>
-    <span v-else aria-hidden="true">◷</span>
+    <span v-else aria-hidden="true">✕</span>
   </button>
   <!-- Раскрывающийся блок -->
   <div 
@@ -270,7 +270,7 @@ interface Input {
   status: TaskStatus
   isPinned?: boolean
 }
-type TaskStatus = 'none' | 'progress' | 'done'
+type TaskStatus = 'none' | 'pending' | 'done'
 
 interface Task {
   id: string
@@ -524,15 +524,15 @@ const rowTime = (row: CardRow): string => (row.kind === 'task' ? row.task.time :
 const rowStatus = (row: CardRow): TaskStatus => (row.kind === 'task' ? row.task.status : row.input.status)
 const statusClass = (row: CardRow): string => {
   const s = rowStatus(row)
-  return s === 'done' ? 'task-status-done' : s === 'progress' ? 'task-status-progress' : ''
+  return s === 'done' ? 'task-status-done' : s === 'pending' ? 'task-status-pending' : ''
 }
 const statusTitle = (row: CardRow): string => {
   const s = rowStatus(row)
-  const name = s === 'done' ? 'Выполнено' : s === 'progress' ? 'В процессе' : 'Без статуса'
+  const name = s === 'done' ? 'Выполнено' : s === 'pending' ? 'Просрочено' : 'Без статуса'
   return `${name} (нажмите, чтобы сменить статус)`
 }
 const cycleStatus = (row: CardRow) => {
-  const order: TaskStatus[] = ['none', 'progress', 'done']
+  const order: TaskStatus[] = ['none', 'done', 'pending']
   const next = order[(order.indexOf(rowStatus(row)) + 1) % order.length]
   if (row.kind === 'task') row.task.status = next
   else row.input.status = next
@@ -774,7 +774,7 @@ onMounted(() => {
 .task-status-badge {
   position: absolute;
   top: -6px;
-  right: 4px;
+  right: 14px;
   width: 18px;
   height: 18px;
   border-radius: 9999px;
@@ -801,8 +801,8 @@ onMounted(() => {
 .task-status-done {
   background-color: #22c55e;
 }
-.task-status-progress {
-  background-color: #f59e0b;
+.task-status-pending {
+  background-color: #ef4444;
 }
 
 /* Анимация для кнопки удаления */
