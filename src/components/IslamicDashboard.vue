@@ -79,32 +79,31 @@
 >
   
   <!-- Блок со свернутым инпутом -->
-  <div 
+  <div @click="onRowClick(index, row, $event)"
   :class="[
-    'collapsed-input-block h-8 mx-2 mt-2 rounded-lg border border-primary flex items-center overflow-hidden transition-all duration-300 ease-in-out',
+    'collapsed-input-block h-8 mx-2 mt-2 rounded-lg border border-primary flex items-center overflow-hidden transition-all duration-300 ease-in-out cursor-pointer select-none',
     isRowExpanded(index, row) ? 'collapsed-hidden' : 'collapsed-visible',
     row.kind === 'fixed' ? 'bg-gray-100' : 'bg-transparent'
   ]"
 >
   <input 
-    @click="row.kind === 'task' && expandAndFocusText(index, row, $event)" 
     :value="rowText(row)" 
     :title="rowText(row)" 
     placeholder="Текст" 
     :class="[
       'text-black border-none outline-none px-2 h-full flex-1 truncate w-full text-sm font-medium font-poppins',
-      row.kind === 'fixed' ? 'cursor-default bg-gray-100 text-center ' : 'cursor-pointer hover:bg-gray-50 bg-transparent'
+      row.kind === 'fixed' ? 'cursor-pointer bg-gray-100 text-center' : 'cursor-pointer hover:bg-gray-50 bg-transparent',
+      rowStatus(row) === 'pending' ? 'line-through' : ''
     ]"
     readonly 
   />
   <div v-if="row.kind === 'task' || rowTime(row)" class="h-full flex items-center">
     <input 
-      @click="row.kind === 'task' && expandAndFocusTime(index, row, $event)" 
       :value="rowTime(row)" 
       placeholder="Время" 
       :class="[
         'border-none outline-none h-full w-auto min-w-[60px] max-w-[110px] text-right placeholder:text-right px-2 text-sm whitespace-nowrap',
-        row.kind === 'fixed' ? 'cursor-default bg-gray-100 text-black' : 'cursor-pointer hover:bg-gray-50 bg-transparent text-black'
+        row.kind === 'fixed' ? 'cursor-pointer bg-gray-100 text-black' : 'cursor-pointer hover:bg-gray-50 bg-transparent text-black'
       ]"
       readonly 
     />
@@ -115,12 +114,13 @@
   <button
     v-show="row.kind === 'fixed' || !isRowExpanded(index, row)"
     type="button"
-    @click.stop="toggleDone(row)"
-    :aria-label="rowDone(row) ? 'Отметить задачу невыполненной' : 'Отметить задачу выполненной'"
-    :title="rowDone(row) ? 'Выполнено (нажмите, чтобы вернуть в работу)' : 'Не выполнено (нажмите, чтобы завершить)'"
-    :class="['task-status-badge', rowDone(row) ? 'task-status-done' : 'task-status-pending']"
+    @click.stop="cycleStatus(row)"
+    :aria-label="statusTitle(row)"
+    :title="statusTitle(row)"
+    :class="['task-status-badge', statusClass(row)]"
   >
-    <span v-if="rowDone(row)" aria-hidden="true">✓</span>
+    <span v-if="rowStatus(row) === 'done'" aria-hidden="true">✓</span>
+    <span v-else-if="rowStatus(row) === 'progress'" aria-hidden="true">◷</span>
     <span v-else aria-hidden="true">✕</span>
   </button>
   <!-- Раскрывающийся блок -->
@@ -267,16 +267,18 @@ interface Input {
   time: string
   text: string
   isFixed: boolean
-  done: boolean
+  status: TaskStatus
   isPinned?: boolean
 }
+type TaskStatus = 'pending' | 'progress' | 'done'
+
 interface Task {
   id: string
   text: string
   time: string
   start: number | null
   end: number | null
-  done: boolean
+  status: TaskStatus
   draftCard: number | null
 }
 
@@ -313,7 +315,7 @@ const getInitialInputsForPrayer = (prayer: PrayerCard): Input[] => {
           time: '',
           text: 'Ратибат',
           isFixed: true,
-          done: false
+          status: 'pending'
         },
         {
           id: `namaz-${prayer.title}-${Date.now()}-2`,
@@ -321,7 +323,7 @@ const getInitialInputsForPrayer = (prayer: PrayerCard): Input[] => {
           time: '',
           text: 'НАМАЗ',
           isFixed: true,
-          done: false
+          status: 'pending'
         },
         {
           id: `azkary-${prayer.title}-${Date.now()}-3`,
@@ -329,7 +331,7 @@ const getInitialInputsForPrayer = (prayer: PrayerCard): Input[] => {
           time: '',
           text: 'Азкары',
           isFixed: true,
-          done: false
+          status: 'pending'
         }
       ]
     
@@ -342,7 +344,7 @@ const getInitialInputsForPrayer = (prayer: PrayerCard): Input[] => {
           time: '',
           text: 'НАМАЗ',
           isFixed: true,
-          done: false
+          status: 'pending'
         },
         {
           id: `ratibat-${prayer.title}-${Date.now()}-2`,
@@ -350,7 +352,7 @@ const getInitialInputsForPrayer = (prayer: PrayerCard): Input[] => {
           time: '',
           text: 'Ратибат',
           isFixed: true,
-          done: false
+          status: 'pending'
         }
       ]
     
@@ -362,7 +364,7 @@ const getInitialInputsForPrayer = (prayer: PrayerCard): Input[] => {
           time: '',
           text: 'НАМАЗ',
           isFixed: true,
-          done: false
+          status: 'pending'
         },
         {
           id: `ratibat-${prayer.title}-${Date.now()}-2`,
@@ -370,7 +372,7 @@ const getInitialInputsForPrayer = (prayer: PrayerCard): Input[] => {
           time: '',
           text: 'Ратибат',
           isFixed: true,
-          done: false
+          status: 'pending'
         },
         {
           id: `tahajjud-${prayer.title}-${Date.now()}-3`,
@@ -378,7 +380,7 @@ const getInitialInputsForPrayer = (prayer: PrayerCard): Input[] => {
           time: '',
           text: 'Тахаджуд',
           isFixed: true,
-          done: false,
+          status: 'pending',
           isPinned: true
         }
       ]
@@ -391,7 +393,7 @@ const getInitialInputsForPrayer = (prayer: PrayerCard): Input[] => {
           time: '',
           text: 'Намаз',
           isFixed: true,
-          done: false
+          status: 'pending'
         }
       ]
   }
@@ -519,7 +521,22 @@ const cardRows = (cardIndex: number): CardRow[] => {
 const rowKey = (row: CardRow): string => (row.kind === 'task' ? row.task.id : row.input.id)
 const rowText = (row: CardRow): string => (row.kind === 'task' ? row.task.text : row.input.text)
 const rowTime = (row: CardRow): string => (row.kind === 'task' ? row.task.time : row.input.time)
-const rowDone = (row: CardRow): boolean => (row.kind === 'task' ? row.task.done : row.input.done)
+const rowStatus = (row: CardRow): TaskStatus => (row.kind === 'task' ? row.task.status : row.input.status)
+const statusClass = (row: CardRow): string => {
+  const s = rowStatus(row)
+  return s === 'done' ? 'task-status-done' : s === 'progress' ? 'task-status-progress' : 'task-status-pending'
+}
+const statusTitle = (row: CardRow): string => {
+  const s = rowStatus(row)
+  const name = s === 'done' ? 'Выполнено' : s === 'progress' ? 'В процессе' : 'Просрочено'
+  return `${name} (нажмите, чтобы сменить статус)`
+}
+const cycleStatus = (row: CardRow) => {
+  const order: TaskStatus[] = ['pending', 'progress', 'done']
+  const next = order[(order.indexOf(rowStatus(row)) + 1) % order.length]
+  if (row.kind === 'task') row.task.status = next
+  else row.input.status = next
+}
 const isRowExpanded = (cardIndex: number, row: CardRow): boolean =>
   row.kind === 'task' && expandedKey.value === `${cardIndex}:${row.task.id}`
 
@@ -595,19 +612,32 @@ const addNewInput = (cardIndex: number) => {
     time: '',
     start: null,
     end: null,
-    done: false,
+    status: 'pending',
     draftCard: cardIndex
   }
   tasks.value.push(task)
 }
 
 
-const toggleDone = (row: CardRow) => {
+let statusClickTimer: ReturnType<typeof setTimeout> | null = null
+
+const onRowClick = (cardIndex: number, row: CardRow, event: MouseEvent) => {
   if (row.kind === 'fixed') {
-    row.input.done = !row.input.done
-  } else {
-    row.task.done = !row.task.done
+    cycleStatus(row)
+    return
   }
+  if (statusClickTimer) {
+    clearTimeout(statusClickTimer)
+    statusClickTimer = null
+    const target = event.target as HTMLElement | null
+    const field = target instanceof HTMLInputElement && target.placeholder === 'Время' ? 'time' : 'text'
+    expandAndFocus(cardIndex, row, field, event)
+    return
+  }
+  statusClickTimer = setTimeout(() => {
+    statusClickTimer = null
+    cycleStatus(row)
+  }, 250)
 }
 
 
@@ -770,6 +800,9 @@ onMounted(() => {
 }
 .task-status-done {
   background-color: #22c55e;
+}
+.task-status-progress {
+  background-color: #f59e0b;
 }
 .task-status-pending {
   background-color: #ef4444;
